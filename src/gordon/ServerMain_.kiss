@@ -1,9 +1,39 @@
 (loadFrom "kiss-express" "src/ServerUtil.kiss")
 
+(import datetime.DateTime)
+
 (defMacro scriptContent []
     (File.getContent "frontend.js"))
+
+(savedVar :Array<ClockEntry> clockEntries [])
+
+(var &mut :ClockEntry currentClockEntry)
 
 (kissExpress app [3000]
     (app.get "/"
         ->[req res next]
-            (res.send "<head><title>${pageName}</title><script>$(scriptContent)</script></head> $(kissExpressHeader) Hello world from the server!")))
+            (res.send "<head><title>${pageName}</title><script>$(scriptContent)</script></head> $(kissExpressHeader)
+            <a href=\"/clock_entry/abc\" >hey hey</a>
+            ${currentClockEntry?.inTime}
+            "))
+    
+    (app.param "project_id" ->[req res next project_id]
+        {
+            (set req.project_id project_id)
+            (next)
+        })
+    
+    (app.get "/clock_entry/:project_id"
+        ->[req :Dynamic res next]
+            (let [projectId req.project_id
+                    currentProjectId currentClockEntry?.projectId]
+                (when currentClockEntry
+                    // Clock out the current entry
+                    (set currentClockEntry.outTime (.getTime (DateTime.now)))
+                    (withMutProperties [clockEntries]
+                        (clockEntries.push currentClockEntry))
+                    (set currentClockEntry null))
+                (unless (= projectId currentProjectId)
+                    (set currentClockEntry
+                        (objectWith [inTime (.getTime (DateTime.now))] projectId)))
+                (res.redirect "/"))))

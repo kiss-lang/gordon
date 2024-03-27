@@ -3,3 +3,4 @@ node_modules/
 libs/
 index.js
 frontend.js
+.*.json
