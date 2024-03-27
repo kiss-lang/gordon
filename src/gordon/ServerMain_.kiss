@@ -1,0 +1,9 @@
+(loadFrom "kiss-express" "src/ServerUtil.kiss")
+
+(defMacro scriptContent []
+    (File.getContent "frontend.js"))
+
+(kissExpress app [3000]
+    (app.get "/"
+        ->[req res next]
+            (res.send "<head><title>${pageName}</title><script>$(scriptContent)</script></head> $(kissExpressHeader) Hello world from the server!")))

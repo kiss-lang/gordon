@@ -1,0 +1,12 @@
+-lib kiss
+-lib kiss-express
+-cp src
+--each
+--main gordon.FrontEndMain
+--dce full
+--js frontend.js
+--next
+-cp externs
+--main gordon.ServerMain
+--js index.js
+--cmd node index.js
