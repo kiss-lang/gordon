@@ -1,23 +1,55 @@
 (loadFrom "kiss-express" "src/ServerUtil.kiss")
 
 (import datetime.DateTime)
+(import uuid.Uuid)
 
 (defMacro scriptContent []
     (File.getContent "frontend.js"))
 
 (savedVar :Array<ClockEntry> clockEntries [])
 
+(savedVar :Map<String,String> projects (new Map))
+
 (var &mut :ClockEntry currentClockEntry)
+
+// TODO store this info incrementally instead of reconstructing it every reload
+(function :Map<String,Float> totalTimes []
+    (let [:Map<String,Float> m (new Map)]
+        (doFor entry clockEntries
+            (unless (m.exists entry.projectId)
+                (dictSet m entry.projectId 0))
+            (+= (dictGet m entry.projectId) (/ (.getTotalSeconds #{DateTime.fromTime(entry.outTime) - DateTime.fromTime(entry.inTime);}#) 3600)))
+        ~m))
 
 (kissExpress app [3000]
     (app.get "/"
         ->[req res next]
-            (res.send "<head><title>${pageName}</title><script>$(scriptContent)</script></head> $(kissExpressHeader)
-            <a href=\"/clock_entry/abc\" >hey hey</a>
-            ${currentClockEntry?.inTime}
-            "))
+            
+            (let [&mut dynamicHtml ""
+                    tt (totalTimes)]
+                (doFor =>uuid name projects
+                    (when (= uuid currentClockEntry?.projectId) (+= dynamicHtml "Since $(DateTime.fromTime currentClockEntry.inTime) -> "))
+                    (+= dynamicHtml
+                        "<a href=\"#\" onclick=\"window.location.href = '/clock_entry/${uuid}';\">${name}</a> $(dictGet tt uuid) hours <br/>"))
+                (res.send "<head><title>${pageName}</title><script>$(scriptContent)</script></head> $(kissExpressHeader)
+                            ${dynamicHtml}
+                            <input id=\"projectName\"></input><a href=\"#\" onclick=\"window.location.href = '/new_project/' + document.getElementById('projectName').value;\">new project</a>
+                            ")))
     
-    (app.param "project_id" ->[req res next project_id]
+    (app.param "project_name" ->[:Dynamic req res next project_name]
+        {
+            (set req.project_name project_name)
+            (next)
+        })
+
+    (app.get "/new_project/:project_name"
+        ->[:Dynamic req :Dynamic res next]
+            (let [projectName req.project_name]
+                (withMutProperties [projects]
+                    (dictSet projects (Uuid.v4) projectName))
+                (res.redirect "/")))
+
+    (app.param "project_id" ->[:Dynamic req res next project_id]
         {
             (set req.project_id project_id)
             (next)

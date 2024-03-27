@@ -1,6 +1,7 @@
 -lib kiss
 -lib kiss-express
 -lib datetime
+-lib uuid
 -cp src
 --each
 --main gordon.FrontEndMain
