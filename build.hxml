@@ -6,7 +6,7 @@
 --each
 --main gordon.FrontEndMain
 --dce full
---js frontend.js
+--js bin/frontend.js
 --next
 -cp externs
 --main gordon.ServerMain

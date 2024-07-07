@@ -4,7 +4,7 @@
 (import uuid.Uuid)
 
 (defMacro scriptContent []
-    (File.getContent "frontend.js"))
+    (File.getContent "bin/frontend.js"))
 
 (userProp :Array<ClockEntry> clockEntries [])
 
