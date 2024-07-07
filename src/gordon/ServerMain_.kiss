@@ -39,6 +39,16 @@
                     (+= (nth (dictGet m entry.projectId) -1) (/ (.getTotalSeconds #{outTime - inTime;}#) 3600))))
             m)))
 
+// Clock out on logout:
+(onLogout req
+    (withUserProp currentClockEntry req
+        (when currentClockEntry
+            // Clock out the current entry
+            (set currentClockEntry.outTime (.getTime (DateTime.now)))
+            (withUserProp clockEntries req
+                (clockEntries.push currentClockEntry))
+            (set currentClockEntry null))))
+
 (kissExpress app [3000]
     (app.get "/"
         (req_res_next []
