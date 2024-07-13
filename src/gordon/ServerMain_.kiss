@@ -57,15 +57,26 @@
                     currentClockEntry (get_user_currentClockEntry req)]
                 (cond
                     (req.user
+                        (localVar &mut isFirst true)
+                        (+= dynamicHtml "<style>td { border: 1px solid black; } th { border: 2px solid black;  }</style>")
                         (doFor =>uuid name (get_user_projects req)
-                            (when (= uuid currentClockEntry?.projectId) (+= dynamicHtml "<strong>Since $(DateTime.fromTime currentClockEntry.inTime) -> "))
                             (let [projectWeekHours (dictGet tt uuid)
                                     projectWeekHoursShort (for hours projectWeekHours (/ (Std.int (* 1000 hours)) 1000))
-                                    hoursStr (projectWeekHoursShort.join " / ")]
+                                    hoursStr (.join (for hours projectWeekHoursShort "<td>${hours}</td>") "")]
+                                (when isFirst
+                                    (+= dynamicHtml "<table><tr><th></th><th>Project</th>")
+                                    (doFor num (range projectWeekHours.length)
+                                        (+= dynamicHtml "<th>Week $(+ num 1)</th>"))
+                                    (+= dynamicHtml "</tr>")
+                                    (set isFirst false))
+                                (+= dynamicHtml "<tr>")
+                                (if (= uuid currentClockEntry?.projectId)
+                                        (+= dynamicHtml "<td><strong>Since $(DateTime.fromTime currentClockEntry.inTime)</strong></td>")
+                                    (+= dynamicHtml "<td></td>"))
                                 (+= dynamicHtml
-                                    "<a href=\"#\" onclick=\"window.location.href = '/clock_entry/${uuid}';\">${name}</a> $hoursStr hours <br/>")
-                                (when (= uuid currentClockEntry?.projectId)
-                                    (+= dynamicHtml "</strong>")))))
+                                    "<td><a href=\"#\" onclick=\"window.location.href = '/clock_entry/${uuid}';\">${name}</a></td>")
+                                (+= dynamicHtml "${hoursStr}</tr>")))
+                        (+= dynamicHtml "</table>"))
                     (true
                         (+= dynamicHtml "Log in or sign up first!")))
                 (res.send "<head><title>${pageName}</title><script>$(scriptContent)</script></head> $(kissExpressHeader req)
