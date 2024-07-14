@@ -7,10 +7,12 @@
     (File.getContent "bin/frontend.js"))
 
 (userProp :Array<ClockEntry> clockEntries [])
+(userProp :Array<ClockAdjustment> clockAdjustments [])
 
 (userProp :Map<String,String> projects (new Map))
 
 (userProp :Null<ClockEntry> currentClockEntry null)
+(userProp :Null<Int> selectedWeek null)
 
 // TODO store this info incrementally instead of reconstructing it every reload
 // Calculate the total hours per project per week over time
@@ -19,6 +21,7 @@
             (new Map)
         (let [projects (get_user_projects req)
                 clockEntries (get_user_clockEntries req)
+                clockAdjustments (get_user_clockAdjustments req)
                 :Map<String,kiss.List<Float>> m (new Map)
                 &mut lastWeek null]
             (doFor =>projectId _ projects
@@ -37,6 +40,8 @@
                                 (.push (dictGet m projectId) 0))))
                     (set lastWeek week)
                     (+= (nth (dictGet m entry.projectId) -1) (/ (.getTotalSeconds #{outTime - inTime;}#) 3600))))
+            (doFor adj clockAdjustments
+                (+= (nth (dictGet m adj.projectId) adj.week) adj.delta))
             m)))
 
 // Clock out on logout:
@@ -61,12 +66,14 @@
                         (+= dynamicHtml "<style>td { border: 1px solid black; } th { border: 2px solid black;  }</style>")
                         (doFor =>uuid name (get_user_projects req)
                             (let [projectWeekHours (dictGet tt uuid)
-                                    projectWeekHoursShort (for hours projectWeekHours (/ (Std.int (* 1000 hours)) 1000))
-                                    hoursStr (.join (for hours projectWeekHoursShort "<td>${hours}</td>") "")]
+                                    projectWeekHoursShort (for hours projectWeekHours (/ (Std.int (* 1000 hours)) 1000)) ]
                                 (when isFirst
                                     (+= dynamicHtml "<table><tr><th></th><th>Project</th>")
                                     (doFor num (range projectWeekHours.length)
-                                        (+= dynamicHtml "<th>Week $(+ num 1)</th>"))
+                                        (+= dynamicHtml "<th")
+                                        (when (= (get_user_selectedWeek req) num)
+                                            (+= dynamicHtml " style=\"background-color: lime;\""))
+                                        (+= dynamicHtml "><a href=\"/select_week/${num}\">Week $(+ num 1)</a></th>"))
                                     (+= dynamicHtml "</tr>")
                                     (set isFirst false))
                                 (+= dynamicHtml "<tr>")
@@ -75,7 +82,19 @@
                                     (+= dynamicHtml "<td></td>"))
                                 (+= dynamicHtml
                                     "<td><a href=\"#\" onclick=\"window.location.href = '/clock_entry/${uuid}';\">${name}</a></td>")
-                                (+= dynamicHtml "${hoursStr}</tr>")))
+                                (doFor [week hours] (enumerate projectWeekHoursShort)
+                                    (+= dynamicHtml "<td")
+                                    (when (= (get_user_selectedWeek req) week)
+                                        (+= dynamicHtml " style=\"background-color: lime;\""))
+                                    (+= dynamicHtml ">${hours}</td>"))
+                                (doFor delta [-8 -4 -2 -1 1 2 4 8]
+                                    (+= dynamicHtml "<td><a href=\"/adjust_project/${uuid}/${delta}\">")
+                                    (+= dynamicHtml
+                                        (if (> 0 delta) 
+                                                "$delta"
+                                            "+$delta"))
+                                    (+= dynamicHtml "</a></td>"))
+                                (+= dynamicHtml "</tr>")))
                         (+= dynamicHtml "</table>"))
                     (true
                         (+= dynamicHtml "Log in or sign up first!")))
@@ -121,4 +140,33 @@
                     (unless (= projectId currentProjectId)
                         (set currentClockEntry
                             (objectWith [inTime (.getTime (DateTime.now))] projectId)))
-                    (res.redirect "/"))))))
+                    (res.redirect "/")))))
+
+    (app.param "week"
+        (req_res_next [week]
+            (set req.week week)
+            (next)))
+    
+    (app.get "/select_week/:week"
+        (req_res_next []
+            (withUserProp selectedWeek req
+                (if (= selectedWeek req.week)
+                        (set selectedWeek null)
+                    (set selectedWeek req.week))
+                (res.redirect "/"))))
+    
+    (app.param "delta"
+        (req_res_next [delta]
+            (set req.delta delta)
+            (next)))
+    
+    (app.get "/adjust_project/:project_id/:delta"
+        (req_res_next []
+            (whenLet [week (get_user_selectedWeek req)]
+                (withUserProp clockAdjustments req
+                    (clockAdjustments.push
+                        (object
+                            projectId req.project_id
+                            delta req.delta
+                            week week))))
+            (res.redirect "/"))))
