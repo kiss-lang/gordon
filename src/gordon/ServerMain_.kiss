@@ -129,6 +129,9 @@
                                                 "$delta"
                                             "+$delta"))
                                     (+= dynamicHtml "</a></td>"))
+                                (let [setTargetText (if (get_user_selectedWeek req) "Set week target" "Set repeating target")]
+                                    (+= dynamicHtml "<td><input id=\"targetBox\"></input>")
+                                    (+= dynamicHtml "<a href=\"#\" onclick=\"window.location.href = '/set_target/${uuid}/' + document.getElementById('targetBox').value;\">${setTargetText}</a></td>"))
                                 (+= dynamicHtml "</tr>")))
                         (+= dynamicHtml "</table>"))
                     (true
@@ -204,4 +207,21 @@
                             projectId req.project_id
                             delta req.delta
                             week week))))
+            (res.redirect "/")))
+    
+    (app.param "amount"
+        (req_res_next [amount]
+            (set req.amount amount)
+            (next)))
+
+    (app.get "/set_target/:project_id/:amount"
+        (req_res_next []
+            (unless (Math.isNaN (Std.parseFloat req.amount))
+                (withUserProp projectWeeklyTargets req
+                    (withUserProp projectRepeatingTargets req
+                        (localVar selectedWeek (get_user_selectedWeek req))
+                        (let [_selectedWeek (or selectedWeek (- .length (dictGet projectWeeklyTargets req.project_id) 1))]
+                            (setNth (dictGet projectWeeklyTargets req.project_id) _selectedWeek (Std.parseFloat req.amount)))
+                        (when selectedWeek
+                            (dictSet projectRepeatingTargets req.project_id (Std.parseFloat req.amount))))))
             (res.redirect "/"))))
