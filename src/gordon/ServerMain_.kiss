@@ -130,8 +130,8 @@
                                             "+$delta"))
                                     (+= dynamicHtml "</a></td>"))
                                 (let [setTargetText (if (get_user_selectedWeek req) "Set week target" "Set repeating target")]
-                                    (+= dynamicHtml "<td><input id=\"targetBox\"></input>")
-                                    (+= dynamicHtml "<a href=\"#\" onclick=\"window.location.href = '/set_target/${uuid}/' + document.getElementById('targetBox').value;\">${setTargetText}</a></td>"))
+                                    (+= dynamicHtml "<td><input id=\"targetBox${uuid}\"></input>")
+                                    (+= dynamicHtml "<a href=\"#\" onclick=\"window.location.href = '/set_target/${uuid}/' + document.getElementById('targetBox${uuid}').value;\">${setTargetText}</a></td>"))
                                 (+= dynamicHtml "</tr>")))
                         (+= dynamicHtml "</table>"))
                     (true
