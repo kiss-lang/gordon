@@ -44,6 +44,22 @@
                 (+= (nth (dictGet m adj.projectId) adj.week) adj.delta))
             m)))
 
+(userProp :Map<String,Array<Float>> projectWeeklyTargets (new Map))
+(userProp :Map<String,Float> projectRepeatingTargets (new Map))
+
+// This should always be called with weeks in ascending order because of how the HTML is constructed in a loop
+(function :Float getProjectTarget [uuid week req]
+    (withUserProp projectWeeklyTargets req
+        (withUserProp projectRepeatingTargets req
+            (unless (projectWeeklyTargets.exists uuid)
+                (dictSet projectWeeklyTargets uuid []))
+            (while (<= .length (dictGet projectWeeklyTargets uuid) week)
+                (.push (dictGet projectWeeklyTargets uuid)
+                    (ifLet [repeatingTarget (dictGet projectRepeatingTargets uuid)]
+                            repeatingTarget
+                        0)))
+            (nth (dictGet projectWeeklyTargets uuid) week))))
+
 // Clock out on logout:
 (onLogout req
     (withUserProp currentClockEntry req
@@ -83,10 +99,29 @@
                                 (+= dynamicHtml
                                     "<td><a href=\"#\" onclick=\"window.location.href = '/clock_entry/${uuid}';\">${name}</a></td>")
                                 (doFor [week hours] (enumerate projectWeekHoursShort)
+                                    (localVar target (getProjectTarget uuid week req))
                                     (+= dynamicHtml "<td")
-                                    (when (= (get_user_selectedWeek req) week)
-                                        (+= dynamicHtml " style=\"background-color: lime;\""))
-                                    (+= dynamicHtml ">${hours}</td>"))
+                                    (cond
+                                        ((= (get_user_selectedWeek req) week)
+                                            (+= dynamicHtml " style=\"background-color: lime;\""))
+                                        ((< 0 target)
+                                            (let [percent (/ hours target)
+                                                    color (cond
+                                                                ((<= 0 percent 0.25) "red")
+                                                                ((<= 0.25 percent 0.5) "tomato")
+                                                                ((<= 0.5 percent 0.75) "orange")
+                                                                ((<= 0.75 percent 1) "yellow")
+                                                                ((<= 1 percent 1.25) "lime")
+                                                                ((<= 1.25 percent 1.5) "yellow")
+                                                                ((<= 1.5 percent 1.75) "orange")
+                                                                ((<= 1.75 percent 2) "tomato")
+                                                                ((<= 2 percent) "red")
+                                                                (true "white"))]
+                                                (+= dynamicHtml " style=\"background-color: ${color};\""))))
+                                    (+= dynamicHtml ">${hours}")
+                                    (when (< 0 target)
+                                        (+= dynamicHtml " / ${target}"))
+                                    (+= dynamicHtml "</td>"))
                                 (doFor delta [-8 -4 -2 -1 1 2 4 8]
                                     (+= dynamicHtml "<td><a href=\"/adjust_project/${uuid}/${delta}\">")
                                     (+= dynamicHtml
