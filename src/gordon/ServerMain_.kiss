@@ -20,21 +20,26 @@
     (if !req.user
             (new Map)
         (let [projects (get_user_projects req)
-                clockEntries (.copy (get_user_clockEntries req))
+                clockEntries (get_user_clockEntries req)
+                &mut currentClockEntry (get_user_currentClockEntry req)
                 clockAdjustments (get_user_clockAdjustments req)
                 :Map<String,kiss.List<Float>> m (new Map)
                 &mut lastWeek null
                 // Add a fake entry with today's date, which will force new weeks to appear in the data
-                &mut addedFakeEntry false]
+                &mut :ClockEntry fakeEntry null]
             (doFor =>projectId _ projects
-                (unless addedFakeEntry
+                (unless fakeEntry
                     (let [now (.getTime (DateTime.now))]
-                        (clockEntries.push (objectWith [inTime now outTime now] projectId))))
+                        (set fakeEntry (objectWith [inTime now outTime now] projectId))
+                        (unless currentClockEntry
+                            (set currentClockEntry fakeEntry))))
                 (dictSet m projectId []))
-            (doFor entry clockEntries
+            (doFor entry (clockEntries.concat [currentClockEntry fakeEntry])
                 (let [inTime (DateTime.fromTime entry.inTime)
-                        outTime (DateTime.fromTime entry.outTime)
+                        &mut outTime (DateTime.fromTime entry.outTime)
                         &mut week (inTime.getWeek)]
+                    // Account for the currently running clock entry:
+                    (unless outTime (set outTime (DateTime.now)))
                     (unless (= lastWeek week)
                         // This only should happen when rolling over to a new year:
                         (when (= lastWeek null) (set lastWeek (- week 1)))
