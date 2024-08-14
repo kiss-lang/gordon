@@ -39,7 +39,7 @@
                         &mut outTime (DateTime.fromTime entry.outTime)
                         &mut week (inTime.getWeek)]
                     // Account for the currently running clock entry:
-                    (unless outTime (set outTime (DateTime.now)))
+                    (unless outTime (set outTime (.getTime (DateTime.now))))
                     (unless (= lastWeek week)
                         // This only should happen when rolling over to a new year:
                         (when (= lastWeek null) (set lastWeek (- week 1)))
