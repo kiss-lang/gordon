@@ -80,7 +80,7 @@
                 (clockEntries.push currentClockEntry))
             (set currentClockEntry null))))
 
-(kissExpress app [3000]
+(kissExpress app [3000 3001 3002]
     (app.get "/"
         (req_res_next []
             (let [&mut dynamicHtml ""
