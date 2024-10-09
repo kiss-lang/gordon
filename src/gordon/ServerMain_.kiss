@@ -34,6 +34,7 @@
                         (unless currentClockEntry
                             (set currentClockEntry fakeEntry))))
                 (dictSet m projectId []))
+            (unless clockEntries (return (for =>id name projects =>id [0.0])))
             (doFor entry (clockEntries.concat [currentClockEntry fakeEntry])
                 (let [inTime (DateTime.fromTime entry.inTime)
                         // Account for the currently running clock entry:
