@@ -237,6 +237,6 @@
                         (localVar selectedWeek (get_user_selectedWeek req))
                         (let [_selectedWeek (or selectedWeek (- .length (dictGet projectWeeklyTargets req.project_id) 1))]
                             (setNth (dictGet projectWeeklyTargets req.project_id) _selectedWeek (Std.parseFloat req.amount)))
-                        (when selectedWeek
+                        (unless selectedWeek
                             (dictSet projectRepeatingTargets req.project_id (Std.parseFloat req.amount))))))
             (res.redirect "/"))))
