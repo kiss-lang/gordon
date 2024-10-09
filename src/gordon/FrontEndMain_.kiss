@@ -3,6 +3,24 @@
 (import js.Browser)
 
 (Browser.window.addEventListener "load" ->{
+    // TODO does this do anything?
     (let [p (Browser.document.createElement "p")]
         (Browser.document.body.appendChild p))
+
+    (var INTERVAL_SEC 3.6)
+    // Update the running clock entry in real-time
+    (whenLet [runningClockTd <#runningClock>]
+        (Browser.window.setInterval ->:Void {
+            (let [twoNumbers (runningClockTd.innerHTML.split " / ")
+                    twoNumbers (for numStr twoNumbers (Std.parseFloat numStr))
+                    intervalSecToHours (/ INTERVAL_SEC 3600.0)]
+                (case twoNumbers
+                    ([actual target]
+                        (+= actual intervalSecToHours)
+                        (set runningClockTd.innerHTML "$(/ (Std.int (* 1000 actual)) 1000) / ${target}"))
+                    ([actual]
+                        (+= actual intervalSecToHours)
+                        (set runningClockTd.innerHTML "$(/ (Std.int (* 1000 actual)) 1000)"))
+                    (never otherwise)))
+        } (* 1000 INTERVAL_SEC)))
 })

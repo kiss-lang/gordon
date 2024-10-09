@@ -112,6 +112,10 @@
                                 (doFor [week hours] (enumerate projectWeekHoursShort)
                                     (localVar target (getProjectTarget uuid week req))
                                     (+= dynamicHtml "<td")
+                                    // Mark the current running clock to update in real-time
+                                    (when (and (= uuid currentClockEntry?.projectId)
+                                                (= week (- projectWeekHoursShort.length 1)))
+                                        (+= dynamicHtml " id=\"runningClock\""))
                                     (cond
                                         ((= (get_user_selectedWeek req) week)
                                             (+= dynamicHtml " style=\"background-color: lime;\""))
