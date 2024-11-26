@@ -97,7 +97,7 @@
                                     projectWeekHoursShort (for hours projectWeekHours (/ (Std.int (* 1000 hours)) 1000)) ]
                                 (when isFirst
                                     (+= dynamicHtml "<table><tr><th></th><th>Project</th>")
-                                    (doFor num (range projectWeekHours.length)
+                                    (doFor num (reverse (collect (range projectWeekHours.length)))
                                         (+= dynamicHtml "<th")
                                         (when (= (get_user_selectedWeek req) num)
                                             (+= dynamicHtml " style=\"background-color: lime;\""))
