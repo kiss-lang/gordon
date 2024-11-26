@@ -10,7 +10,7 @@
     // Localize the timestamp sent by the server:
     (let [timestamp <#timestamp>
             dateString (timestamp.innerHTML.replace "Since " "")
-            date (Date.fromString dateString)
+            date (Date.fromTime (Std.parseFloat dateString))
             now (Date.now)
             differentDay (or 
                             !(= (date.getDate) (now.getDate))

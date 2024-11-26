@@ -114,7 +114,7 @@
                                 (if (= uuid currentClockEntry?.projectId)
                                         // Show when clocked in:
                                         // TODO color it to warn of crunch
-                                        (+= dynamicHtml "<td><strong id=\"timestamp\">Since $(DateTime.fromTime currentClockEntry.inTime)</strong></td>")
+                                        (+= dynamicHtml "<td><strong id=\"timestamp\">Since ${currentClockEntry.inTime}</strong></td>")
                                     // Hide button:
                                     (+= dynamicHtml "<td><a href=\"#\" onclick=\"window.location.href = '/hide_project/${uuid}';\">Hide</a></td>"))
                                 (+= dynamicHtml
