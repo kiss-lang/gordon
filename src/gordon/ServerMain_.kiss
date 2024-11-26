@@ -197,13 +197,13 @@
                         currentProjectId currentClockEntry?.projectId]
                     (when currentClockEntry
                         // Clock out the current entry
-                        (set currentClockEntry.outTime (.getTime (DateTime.now)))
+                        (set currentClockEntry.outTime (.getTime (Date.now)))
                         (withUserProp clockEntries req
                             (clockEntries.push currentClockEntry))
                         (set currentClockEntry null))
                     (unless (= projectId currentProjectId)
                         (set currentClockEntry
-                            (objectWith [inTime (.getTime (DateTime.now))] projectId)))
+                            (objectWith [inTime (.getTime (Date.now))] projectId)))
                     (res.redirect "/")))))
 
     (app.get "/hide_project/:project_id"
