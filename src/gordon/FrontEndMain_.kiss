@@ -3,9 +3,7 @@
 (import js.Browser)
 
 (Browser.window.addEventListener "load" ->{
-    // TODO does this do anything?
-    (let [p (Browser.document.createElement "p")]
-        (Browser.document.body.appendChild p))
+    (reloadOnFocus)
 
     (var INTERVAL_SEC 3.6)
     // Update the running clock entry in real-time
