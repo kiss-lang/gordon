@@ -37,10 +37,10 @@
                 (dictSet m projectId []))
             (unless clockEntries (return (for =>id name projects =>id [0.0])))
             (doFor entry (clockEntries.concat [currentClockEntry fakeEntry])
-                (let [inTime (DateTime.fromTime entry.inTime)
+                (let [inTime (DateTime.fromDate (Date.fromTime entry.inTime))
                         // Account for the currently running clock entry:
                         _outTime (or entry.outTime (.getTime (Date.now)))
-                        outTime (DateTime.fromTime _outTime)
+                        outTime (DateTime.fromDate (Date.fromTime _outTime))
                         &mut week (inTime.getWeek)]
                     (unless (= lastWeek week)
                         // This only should happen when rolling over to a new year:
