@@ -30,7 +30,7 @@
                 &mut :ClockEntry fakeEntry null]
             (doFor =>projectId _ projects
                 (unless fakeEntry
-                    (let [now (.getTime (DateTime.now))]
+                    (let [now (.getTime (Date.now))]
                         (set fakeEntry (objectWith [inTime now outTime now] projectId))
                         (unless currentClockEntry
                             (set currentClockEntry fakeEntry))))
@@ -39,7 +39,7 @@
             (doFor entry (clockEntries.concat [currentClockEntry fakeEntry])
                 (let [inTime (DateTime.fromTime entry.inTime)
                         // Account for the currently running clock entry:
-                        _outTime (or entry.outTime (.getTime (DateTime.now)))
+                        _outTime (or entry.outTime (.getTime (Date.now)))
                         outTime (DateTime.fromTime _outTime)
                         &mut week (inTime.getWeek)]
                     (unless (= lastWeek week)
@@ -77,7 +77,7 @@
     (withUserProp currentClockEntry req
         (when currentClockEntry
             // Clock out the current entry
-            (set currentClockEntry.outTime (.getTime (DateTime.now)))
+            (set currentClockEntry.outTime (.getTime (Date.now)))
             (withUserProp clockEntries req
                 (clockEntries.push currentClockEntry))
             (set currentClockEntry null))))
