@@ -4,11 +4,15 @@
 -lib uuid
 -cp src
 --each
---main gordon.FrontEndMain
---dce full
---js bin/frontend.js
---next
+
 -cp externs
 --main gordon.ServerMain
 --js bin/index.js
+--next
+
+--main gordon.FrontEndMain
+--dce full
+--define frontend
+--js bin/frontend.js
+
 --cmd node bin/index.js
