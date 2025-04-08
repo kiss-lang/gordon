@@ -87,7 +87,7 @@
         (req_res_next []
             (let [&mut dynamicHtml ""
                     tt (totalTimes req)
-                    columns (+ 1 (Lambda.count tt))
+                    columns (+ 2 (Lambda.count tt))
                     columnTag "c1-$columns"
                     currentClockEntry (get_user_currentClockEntry req)]
                 (cond
@@ -163,7 +163,7 @@
                                 (+= dynamicHtml "</${columnTag}>")))
                         (+= dynamicHtml "</r-c>"))
                     (true
-                        (+= dynamicHtml "Log in or sign up first!")))
+                        (+= dynamicHtml "<r-c><c1-1>Log in or sign up first!</c1-1></r-c>")))
                 (res.send (wrapHTML req "<script>$(scriptContent)</script>
                             ${dynamicHtml}
                             <r-c>
