@@ -93,18 +93,17 @@
                 (cond
                     (req.user
                         (localVar &mut isFirst true)
-                        (+= dynamicHtml "<style>d { border: 1px solid black; } h { border: 2px solid black;  }</style>")
                         (+= dynamicHtml "<r-c>")
                         (doFor =>uuid name (get_user_projects req)
                             (let [projectWeekHours (dictGet tt uuid)
                                     projectWeekHoursShort (for hours projectWeekHours (/ (Std.int (* 1000 hours)) 1000))]
                                 (when isFirst
-                                	(+= dynamicHtml "<${columnTag}><h>Project</h>")
+                                	(+= dynamicHtml "<${columnTag}><p>Project</p><")
                                     (doFor num (reverse (collect (range projectWeekHours.length)))
-                                        (+= dynamicHtml "<h")
+                                        (+= dynamicHtml "<p")
                                         (when (= (get_user_selectedWeek req) num)
                                             (+= dynamicHtml " style=\"background-color: lime;\""))
-                                        (+= dynamicHtml "><a href=\"/select_week/${num}\">Week $(+ num 1)</a></th>"))
+                                        (+= dynamicHtml "><a href=\"/select_week/${num}\">Week $(+ num 1)</a></p>"))
                                     (+= dynamicHtml "</${columnTag}>")
                                     (set isFirst false))
                                 
@@ -117,14 +116,14 @@
                                 (if (= uuid currentClockEntry?.projectId)
                                         // Show when clocked in:
                                         // TODO color it to warn of crunch
-                                        (+= dynamicHtml "<d><strong id=\"timestamp\">Since ${currentClockEntry.inTime}</strong></d>")
+                                        (+= dynamicHtml "<p><strong id=\"timestamp\">Since ${currentClockEntry.inTime}</strong></p>")
                                     // Hide button:
-                                    (+= dynamicHtml "<d><a href=\"#\" onclick=\"window.location.href = '/hide_project/${uuid}';\">Hide</a></d>"))
+                                    (+= dynamicHtml "<p><a href=\"#\" onclick=\"window.location.href = '/hide_project/${uuid}';\">Hide</a></p>"))
                                 (+= dynamicHtml
-                                    "<td><a href=\"#\" onclick=\"window.location.href = '/clock_entry/${uuid}';\">${name}</a></td>")
+                                    "<p><a href=\"#\" onclick=\"window.location.href = '/clock_entry/${uuid}';\">${name}</a></p>")
                                 (doFor [week hours] (reverse (enumerate projectWeekHoursShort))
                                     (localVar target (getProjectTarget uuid week req))
-                                    (+= dynamicHtml "<d")
+                                    (+= dynamicHtml "<p")
                                     // Mark the current running clock to update in real-time
                                     (when (and (= uuid currentClockEntry?.projectId)
                                                 (= week (- projectWeekHoursShort.length 1)))
@@ -149,17 +148,17 @@
                                     (+= dynamicHtml ">${hours}")
                                     (when (< 0 target)
                                         (+= dynamicHtml " / ${target}"))
-                                    (+= dynamicHtml "</d>"))
+                                    (+= dynamicHtml "</p>"))
                                 (doFor delta [-8 -4 -2 -1 1 2 4 8]
-                                    (+= dynamicHtml "<d><a href=\"/adjust_project/${uuid}/${delta}\">")
+                                    (+= dynamicHtml "<p><a href=\"/adjust_project/${uuid}/${delta}\">")
                                     (+= dynamicHtml
                                         (if (> 0 delta) 
                                                 "$delta"
                                             "+$delta"))
-                                    (+= dynamicHtml "</a></d>"))
+                                    (+= dynamicHtml "</a></p>"))
                                 (let [setTargetText (if (get_user_selectedWeek req) "Set week target" "Set repeating target")]
-                                    (+= dynamicHtml "<d><input id=\"targetBox${uuid}\"></input>")
-                                    (+= dynamicHtml "<a href=\"#\" onclick=\"window.location.href = '/set_target/${uuid}/' + document.getElementById('targetBox${uuid}').value;\">${setTargetText}</a></d>"))
+                                    (+= dynamicHtml "<p><input id=\"targetBox${uuid}\"></input>")
+                                    (+= dynamicHtml "<a href=\"#\" onclick=\"window.location.href = '/set_target/${uuid}/' + document.getElementById('targetBox${uuid}').value;\">${setTargetText}</a></p>"))
                                 (+= dynamicHtml "</${columnTag}>")))
                         (+= dynamicHtml "</r-c>"))
                     (true
