@@ -98,7 +98,7 @@
                             (let [projectWeekHours (dictGet tt uuid)
                                     projectWeekHoursShort (for hours projectWeekHours (/ (Std.int (* 1000 hours)) 1000))]
                                 (when isFirst
-                                	(+= dynamicHtml "<${columnTag}><p>Project</p><p></p>")
+                                	(+= dynamicHtml "<${columnTag}><p>Project</p><p>|</p>")
                                     (doFor num (reverse (collect (range projectWeekHours.length)))
                                         (+= dynamicHtml "<p")
                                         (when (= (get_user_selectedWeek req) num)
