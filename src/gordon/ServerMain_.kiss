@@ -98,7 +98,7 @@
                             (let [projectWeekHours (dictGet tt uuid)
                                     projectWeekHoursShort (for hours projectWeekHours (/ (Std.int (* 1000 hours)) 1000))]
                                 (when isFirst
-                                	(+= dynamicHtml "<${columnTag}><p>Project</p><")
+                                	(+= dynamicHtml "<${columnTag}><p>Project</p>")
                                     (doFor num (reverse (collect (range projectWeekHours.length)))
                                         (+= dynamicHtml "<p")
                                         (when (= (get_user_selectedWeek req) num)
@@ -113,14 +113,15 @@
                                         (continue)))
 
                                 (+= dynamicHtml "<${columnTag}>")
+                               (+= dynamicHtml
+                                    "<p><a href=\"#\" onclick=\"window.location.href = '/clock_entry/${uuid}';\">${name}</a></p>")
                                 (if (= uuid currentClockEntry?.projectId)
                                         // Show when clocked in:
                                         // TODO color it to warn of crunch
                                         (+= dynamicHtml "<p><strong id=\"timestamp\">Since ${currentClockEntry.inTime}</strong></p>")
                                     // Hide button:
                                     (+= dynamicHtml "<p><a href=\"#\" onclick=\"window.location.href = '/hide_project/${uuid}';\">Hide</a></p>"))
-                                (+= dynamicHtml
-                                    "<p><a href=\"#\" onclick=\"window.location.href = '/clock_entry/${uuid}';\">${name}</a></p>")
+ 
                                 (doFor [week hours] (reverse (enumerate projectWeekHoursShort))
                                     (localVar target (getProjectTarget uuid week req))
                                     (+= dynamicHtml "<p")
