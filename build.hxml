@@ -5,7 +5,7 @@
 -cp src
 --each
 
---main gordon.FrontEndMain
+--main gordon.FrontendMain
 --dce full
 --define frontend
 --js bin/frontend.js
