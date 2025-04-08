@@ -1,7 +1,7 @@
 package gordon;
 
-class FrontEndMain {
+class FrontendMain {
     static function main() {
-        FrontEndMain_.main();
+        FrontendMain_.main();
     }
 }
